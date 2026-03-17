@@ -87,10 +87,11 @@ impl DbClient {
                 Some(s)
             }
         });
+        let search_value = search.unwrap_or("");
+        let pattern = format!("%{}%", search_value);
         // Get count and programs using cached status from database
         // This query excludes programs that are marked as closed or frozen in the database
-        let total_count: i64 = if let Some(s) = search {
-            let pattern = format!("%{}%", s);
+        let total_count: i64 = {
             let count_query = r#"
                 SELECT COUNT(DISTINCT vp.program_id) as total
                 FROM verified_programs vp
@@ -99,27 +100,11 @@ impl DbClient {
                 WHERE vp.is_verified = true
                 AND (pa.is_closed IS NULL OR pa.is_closed = false)
                 AND (pa.is_frozen IS NULL OR pa.is_frozen = false)
-                AND (vp.program_id ILIKE $1 OR sp.repository ILIKE $1)
+                AND ($1 = '' OR vp.program_id ILIKE $2 OR sp.repository ILIKE $2)
             "#;
             sql_query(count_query)
+                .bind::<diesel::sql_types::Text, _>(search_value)
                 .bind::<diesel::sql_types::Text, _>(&pattern)
-                .get_result::<CountResult>(conn)
-                .await
-                .map_err(|e| {
-                    error!("Failed to get total count of verified programs: {}", e);
-                    e
-                })?
-                .total
-        } else {
-            let count_query = r#"
-                SELECT COUNT(DISTINCT vp.program_id) as total
-                FROM verified_programs vp
-                LEFT JOIN program_authority pa ON vp.program_id = pa.program_id
-                WHERE vp.is_verified = true
-                AND (pa.is_closed IS NULL OR pa.is_closed = false)
-                AND (pa.is_frozen IS NULL OR pa.is_frozen = false)
-            "#;
-            sql_query(count_query)
                 .get_result::<CountResult>(conn)
                 .await
                 .map_err(|e| {
@@ -135,8 +120,7 @@ impl DbClient {
         );
 
         // Fetch programs excluding closed/frozen ones using cached database status
-        let program_ids: Vec<String> = if let Some(s) = search {
-            let pattern = format!("%{}%", s);
+        let program_ids: Vec<String> = {
             let query = r#"
                 SELECT DISTINCT vp.program_id
                 FROM verified_programs vp
@@ -145,35 +129,13 @@ impl DbClient {
                 WHERE vp.is_verified = true
                 AND (pa.is_closed IS NULL OR pa.is_closed = false)
                 AND (pa.is_frozen IS NULL OR pa.is_frozen = false)
-                AND (vp.program_id ILIKE $1 OR sp.repository ILIKE $1)
+                AND ($1 = '' OR vp.program_id ILIKE $2 OR sp.repository ILIKE $2)
                 ORDER BY vp.program_id
-                LIMIT $2 OFFSET $3
+                LIMIT $3 OFFSET $4
             "#;
             sql_query(query)
+                .bind::<diesel::sql_types::Text, _>(search_value)
                 .bind::<diesel::sql_types::Text, _>(&pattern)
-                .bind::<diesel::sql_types::BigInt, _>(PER_PAGE)
-                .bind::<diesel::sql_types::BigInt, _>(offset)
-                .get_results::<ProgramIdResult>(conn)
-                .await
-                .map_err(|e| {
-                    error!("Failed to fetch paginated verified programs: {}", e);
-                    e
-                })?
-                .into_iter()
-                .map(|result| result.program_id)
-                .collect()
-        } else {
-            let query = r#"
-                SELECT DISTINCT vp.program_id
-                FROM verified_programs vp
-                LEFT JOIN program_authority pa ON vp.program_id = pa.program_id
-                WHERE vp.is_verified = true
-                AND (pa.is_closed IS NULL OR pa.is_closed = false)
-                AND (pa.is_frozen IS NULL OR pa.is_frozen = false)
-                ORDER BY vp.program_id
-                LIMIT $1 OFFSET $2
-            "#;
-            sql_query(query)
                 .bind::<diesel::sql_types::BigInt, _>(PER_PAGE)
                 .bind::<diesel::sql_types::BigInt, _>(offset)
                 .get_results::<ProgramIdResult>(conn)

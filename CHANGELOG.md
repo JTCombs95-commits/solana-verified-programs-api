@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Webhook callback support** for async verify APIs
 - **Search query parameter** for the verified programs endpoint
+- **Optional `error` field** in the verified programs list response
 - **Redis health check** in the `/health` endpoint
 - **Validation** for verify endpoints: pubkeys and URL format
 
