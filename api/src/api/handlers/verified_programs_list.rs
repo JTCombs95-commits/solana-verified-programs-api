@@ -44,7 +44,7 @@ pub(crate) async fn get_verified_programs_list_paginated(
     let search: Option<&str> = query.search.as_deref();
 
     if let Some(s) = search {
-        if let Some(msg) = validation::validate_search(s) {
+        if let Err(msg) = validation::validate_search(s) {
             return (
                 StatusCode::BAD_REQUEST,
                 Json(VerifiedProgramListResponse {
@@ -57,7 +57,7 @@ pub(crate) async fn get_verified_programs_list_paginated(
                         has_prev_page: false,
                     },
                     verified_programs: vec![],
-                    error: Some(msg.to_string()),
+                    error: Some(msg),
                 }),
             );
         }

@@ -39,18 +39,18 @@ pub fn validate_http_url(value: &str) -> Result<(), String> {
 const SEARCH_VALIDATION_MSG: &str = "Search must be a valid Solana address or a valid URL";
 
 /// Validates search query; must be a valid Solana public key or a valid URL
-pub fn validate_search(search: &str) -> Option<&'static str> {
+pub fn validate_search(search: &str) -> Result<(), String> {
     let s = search.trim();
     if s.is_empty() {
-        return None;
+        return Ok(());
     }
     if validate_pubkey(s).is_ok() {
-        return None;
+        return Ok(());
     }
     if validate_http_url(s).is_ok() {
-        return None;
+        return Ok(());
     }
-    Some(SEARCH_VALIDATION_MSG)
+    Err(SEARCH_VALIDATION_MSG.to_string())
 }
 
 #[cfg(test)]
@@ -96,6 +96,25 @@ mod tests {
         assert_eq!(
             validate_http_url(""),
             Err("URL cannot be empty".to_string())
+        );
+    }
+
+    #[test]
+    fn test_validate_search() {
+        assert_eq!(validate_search(""), Ok(()));
+        assert_eq!(validate_search("   "), Ok(()));
+        assert_eq!(
+            validate_search("verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC"),
+            Ok(())
+        );
+        assert_eq!(validate_search("https://github.com/foo/bar"), Ok(()));
+        assert_eq!(
+            validate_search("not-a-pubkey-or-url"),
+            Err(SEARCH_VALIDATION_MSG.to_string())
+        );
+        assert_eq!(
+            validate_search("ftp://example.com"),
+            Err(SEARCH_VALIDATION_MSG.to_string())
         );
     }
 }
