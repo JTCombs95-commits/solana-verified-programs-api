@@ -20,7 +20,7 @@ pub async fn health_check(State(db): State<DbClient>) -> (StatusCode, Json<serde
     };
 
     // Get database connection and status
-    let (db_ok, db_status) = match db.get_db_conn().await {
+    let (db_status, db_ok) = match db.get_db_conn().await {
         Ok(_) => (serde_json::json!("connected"), true),
         Err(e) => (
             serde_json::json!({

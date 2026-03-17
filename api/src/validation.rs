@@ -15,13 +15,24 @@ pub fn validate_http_url(value: &str) -> Result<(), String> {
         return Err("URL cannot be empty".to_string());
     }
     let url = reqwest::Url::parse(value).map_err(|e| format!("Invalid URL: {}", e))?;
-    match url.scheme() {
-        "http" | "https" => {}
-        _ => return Err("URL must use http or https scheme".to_string()),
-    }
-    if url.host_str().filter(|h| !h.is_empty()).is_none() {
+    let host = url.host_str().filter(|h| !h.is_empty());
+    if let Some(host) = host {
+        const LOCALHOST_HOSTS: [&str; 3] = ["localhost", "127.0.0.1", "::1"];
+
+        match url.scheme() {
+            "https" => {}
+            "http" => {
+                let is_localhost = LOCALHOST_HOSTS.contains(&host) || host.starts_with("127.");
+                if !is_localhost {
+                    return Err("URL must use https except for localhost".to_string());
+                }
+            }
+            _ => return Err("URL must use http or https scheme".to_string()),
+        }
+    } else {
         return Err("URL must have a valid host".to_string());
     }
+
     Ok(())
 }
 
@@ -70,8 +81,10 @@ mod tests {
         );
         assert_eq!(
             validate_http_url("http://github.com/solana-labs/solana"),
-            Ok(())
+            Err("URL must use https except for localhost".to_string())
         );
+        assert_eq!(validate_http_url("http://localhost:3000/callback"), Ok(()));
+        assert_eq!(validate_http_url("http://127.0.0.1/callback"), Ok(()));
         assert_eq!(
             validate_http_url("ftp://github.com/solana-labs/solana"),
             Err("URL must use http or https scheme".to_string())
