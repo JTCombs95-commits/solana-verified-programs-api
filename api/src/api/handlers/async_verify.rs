@@ -146,7 +146,7 @@ async fn spawn_verification_task(
             error!("Verification task failed: {:?}", e);
         }
         if let Some(url) = webhook_url {
-            notify_webhook(url, result, uuid);
+            notify_webhook(url, result, uuid).await;
         }
     });
 }

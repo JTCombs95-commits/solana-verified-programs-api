@@ -264,10 +264,7 @@ async fn process_verification_output(
 /// * `webhook_url` - URL to post the verification result
 /// * `result` - Result of the verification process
 /// * `request_id` - Unique identifier for the verification request
-///
-/// constructs the payload and spawns a task to post the payload to the webhook URL
-///
-pub fn notify_webhook(
+pub async fn notify_webhook(
     webhook_url: String,
     result: std::result::Result<VerifiedProgram, ApiError>,
     request_id: String,
@@ -294,11 +291,9 @@ pub fn notify_webhook(
             error: Some(e.to_string()),
         },
     };
-    tokio::spawn(async move {
-        if let Err(e) = post_webhook(&webhook_url, &payload).await {
-            error!("Webhook failed to post payload to {}: {:?}", webhook_url, e);
-        }
-    });
+    if let Err(e) = post_webhook(&webhook_url, &payload).await {
+        error!("Webhook failed to post payload to {}: {:?}", webhook_url, e);
+    }
 }
 
 /// POSTs the verification result payload to the webhook URL
