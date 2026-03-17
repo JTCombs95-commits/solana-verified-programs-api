@@ -14,7 +14,7 @@ pub fn validate_http_url(value: &str) -> Result<(), String> {
     if value.trim().is_empty() {
         return Err("URL cannot be empty".to_string());
     }
-    let url = url::Url::parse(value).map_err(|e| format!("Invalid URL: {}", e))?;
+    let url = reqwest::Url::parse(value).map_err(|e| format!("Invalid URL: {}", e))?;
     match url.scheme() {
         "http" | "https" => {}
         _ => return Err("URL must use http or https scheme".to_string()),
