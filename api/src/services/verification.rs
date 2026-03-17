@@ -308,7 +308,11 @@ async fn post_webhook(
     url: &str,
     payload: &VerificationWebhookPayload,
 ) -> std::result::Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(10))
+        .connect_timeout(Duration::from_secs(5))
+        .build()
+        .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>)?;
     let mut last_error = None;
     for attempt in 0..MAX_WEBHOOK_RETRIES {
         match client.post(url).json(payload).send().await {

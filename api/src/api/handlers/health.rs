@@ -1,5 +1,5 @@
 use crate::{db::DbClient, services::background_jobs::BackgroundJobManager};
-use axum::{Json, extract::State, http::StatusCode};
+use axum::{extract::State, http::StatusCode, Json};
 
 /// Health check endpoint that includes background job status
 pub async fn health_check(State(db): State<DbClient>) -> (StatusCode, Json<serde_json::Value>) {
