@@ -1,15 +1,78 @@
 // src/api/index.rs
 
-use axum::Json;
-use serde_json::{json, Value};
+use axum::{Json, response::Html};
+use serde_json::{Value, json};
 use std::sync::OnceLock;
 
 /// Static JSON response for the index endpoint
 static INDEX_JSON: OnceLock<Value> = OnceLock::new();
 
+static LANDING_HTML: &str = r#"<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solana Verified Builds</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.5; margin: 0; }
+      main { max-width: 880px; margin: 0 auto; padding: 56px 20px; }
+      h1 { font-size: 32px; margin: 0 0 12px; }
+      p { margin: 0 0 16px; }
+      .card { border: 1px solid rgba(127,127,127,.25); border-radius: 12px; padding: 16px; margin: 18px 0; }
+      .muted { opacity: .85; }
+      a { color: inherit; }
+      ul { margin: 10px 0 0 18px; padding: 0; }
+      footer { margin-top: 28px; font-size: 14px; opacity: .85; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Solana Verifiable Build</h1>
+      <p class="muted">
+        Verified builds help users confirm that an on-chain Solana program matches its public source code.
+      </p>
+
+      <div class="card">
+        <strong>Need help?</strong>
+        <ul>
+          <li>Email: <a href="mailto:contact@osec.io">contact@osec.io</a></li>
+          <li>GitHub: <a href="https://github.com/otter-sec/solana-verified-programs-api">otter-sec/solana-verified-programs-api</a></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <strong>Docs</strong>
+        <p class="muted" style="margin-top:10px;">
+          Learn how to create verified builds in the official documentation.
+        </p>
+        <p style="margin:0;">
+          <a href="https://solana.com/docs/programs/verified-builds#how-do-i-create-verified-builds">
+            Solana docs: Verified Builds (How do I create verified builds?)
+          </a>
+        </p>
+        <p class="muted" style="margin-top:12px;">
+          Build tool: <a href="https://github.com/solana-foundation/solana-verifiable-build">solana-verifiable-build</a>
+        </p>
+      </div>
+
+      <footer>
+        Looking for the API? See <code>GET /api</code> for the endpoint list.
+      </footer>
+    </main>
+  </body>
+</html>
+"#;
+
+/// Simple landing page for https://verify.osec.io
+pub fn landing_page() -> Html<&'static str> {
+    Html(LANDING_HTML)
+}
+
 /// Handler for the index endpoint that provides API documentation
 ///
-/// # Endpoint: GET /
+/// # Endpoint: GET /api
 ///
 /// # Returns
 /// * `Json<Value>` - JSON response containing API endpoint documentation
@@ -19,6 +82,12 @@ pub fn index() -> Json<Value> {
             "endpoints": [
                 {
                     "path": "/",
+                    "method": "GET",
+                    "description": "Landing page",
+                    "params": {}
+                },
+                {
+                    "path": "/api",
                     "method": "GET",
                     "description": "API endpoint documentation",
                     "params": {}

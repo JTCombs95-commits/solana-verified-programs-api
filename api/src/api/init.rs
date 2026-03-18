@@ -19,7 +19,10 @@ use tower_http::{
 };
 use tracing::Span;
 
-use super::{handlers::*, index::index};
+use super::{
+    handlers::*,
+    index::{index, landing_page},
+};
 
 pub fn initialize_router(db: DbClient) -> Router {
     let error_handler = || {
@@ -131,7 +134,8 @@ pub fn initialize_router(db: DbClient) -> Router {
                 .layer(CompressionLayer::new().zstd(true)),
         )
         // Base route
-        .route("/", get(|| async { index() }))
+        .route("/", get(|| async { landing_page() }))
+        .route("/api", get(|| async { index() }))
         .route("/health", get(health_check))
         .route("/health/background-jobs", get(background_job_status))
         // Apply common middleware
