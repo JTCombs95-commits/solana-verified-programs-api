@@ -143,25 +143,31 @@ pub fn validation_error_response(message: impl Into<String>) -> (StatusCode, Jso
 pub type HandlerError = Box<(StatusCode, Json<ApiResponse>)>;
 pub type HandlerResult<T> = Result<T, HandlerError>;
 
-pub fn validate_program_id(program_id: &str) -> HandlerResult<()> {
-    validation::validate_pubkey(program_id)
+pub fn validate_pubkey(value: &str) -> HandlerResult<()> {
+    validation::validate_pubkey(value)
         .map(|_| ())
         .map_err(|e| Box::new(validation_error_response(e)))
+}
+
+pub fn validate_http_url(value: &str) -> HandlerResult<()> {
+    validation::validate_http_url(value).map_err(|e| Box::new(validation_error_response(e)))
+}
+
+pub fn validate_program_id(program_id: &str) -> HandlerResult<()> {
+    validate_pubkey(program_id)
 }
 
 pub fn validate_signer(signer: &str) -> HandlerResult<()> {
-    validation::validate_pubkey(signer)
-        .map(|_| ())
-        .map_err(|e| Box::new(validation_error_response(e)))
+    validate_pubkey(signer)
 }
 
 pub fn validate_repository_url(repository: &str) -> HandlerResult<()> {
-    validation::validate_http_url(repository).map_err(|e| Box::new(validation_error_response(e)))
+    validate_http_url(repository)
 }
 
 pub fn validate_webhook_url(webhook_url: &Option<String>) -> HandlerResult<()> {
     if let Some(url) = webhook_url.as_deref() {
-        validation::validate_http_url(url).map_err(|e| Box::new(validation_error_response(e)))?;
+        validate_http_url(url)?;
     }
     Ok(())
 }
