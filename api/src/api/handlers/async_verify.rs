@@ -1,5 +1,6 @@
 use super::verify_helpers::{
-    create_and_insert_build, setup_verification, validation_error_response,
+    create_and_insert_build, setup_verification, validate_program_id, validate_repository_url,
+    validate_signer, validate_webhook_url,
 };
 use crate::{
     db::{
@@ -13,7 +14,6 @@ use crate::{
         onchain::program_metadata_retriever::is_program_buffer_missing,
         verification::{check_and_handle_duplicates, notify_webhook, process_verification_request},
     },
-    validation,
 };
 use axum::{extract::State, http::StatusCode, Json};
 use tracing::{error, info};
@@ -25,16 +25,14 @@ pub(crate) async fn process_async_verification(
     State(db): State<DbClient>,
     Json(payload): Json<SolanaProgramBuildParams>,
 ) -> (StatusCode, Json<ApiResponse>) {
-    if let Err(e) = validation::validate_pubkey(&payload.program_id) {
-        return validation_error_response(e);
+    if let Err(resp) = validate_program_id(&payload.program_id) {
+        return *resp;
     }
-    if let Err(e) = validation::validate_http_url(&payload.repository) {
-        return validation_error_response(e);
+    if let Err(resp) = validate_repository_url(&payload.repository) {
+        return *resp;
     }
-    if let Some(ref url) = payload.webhook_url {
-        if let Err(e) = validation::validate_http_url(url) {
-            return validation_error_response(e);
-        }
+    if let Err(resp) = validate_webhook_url(&payload.webhook_url) {
+        return *resp;
     }
 
     info!(
@@ -57,16 +55,14 @@ pub(crate) async fn process_async_verification_with_signer(
     State(db): State<DbClient>,
     Json(payload): Json<SolanaProgramBuildParamsWithSigner>,
 ) -> (StatusCode, Json<ApiResponse>) {
-    if let Err(e) = validation::validate_pubkey(&payload.program_id) {
-        return validation_error_response(e);
+    if let Err(resp) = validate_program_id(&payload.program_id) {
+        return *resp;
     }
-    if let Err(e) = validation::validate_pubkey(&payload.signer) {
-        return validation_error_response(e);
+    if let Err(resp) = validate_signer(&payload.signer) {
+        return *resp;
     }
-    if let Some(ref url) = payload.webhook_url {
-        if let Err(e) = validation::validate_http_url(url) {
-            return validation_error_response(e);
-        }
+    if let Err(resp) = validate_webhook_url(&payload.webhook_url) {
+        return *resp;
     }
 
     info!(

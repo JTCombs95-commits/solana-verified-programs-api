@@ -1,5 +1,6 @@
 use super::verify_helpers::{
-    create_and_insert_build, create_internal_error, setup_verification, validation_error_response,
+    create_and_insert_build, create_internal_error, setup_verification, validate_program_id,
+    validate_repository_url,
 };
 use crate::{
     db::{
@@ -10,7 +11,6 @@ use crate::{
         build_repository_url,
         verification::{check_and_handle_duplicates, process_verification_request},
     },
-    validation,
 };
 use axum::{extract::State, http::StatusCode, Json};
 use tracing::{error, info};
@@ -32,11 +32,11 @@ pub(crate) async fn process_sync_verification(
     State(db): State<DbClient>,
     Json(payload): Json<SolanaProgramBuildParams>,
 ) -> (StatusCode, Json<ApiResponse>) {
-    if let Err(e) = validation::validate_pubkey(&payload.program_id) {
-        return validation_error_response(e);
+    if let Err(resp) = validate_program_id(&payload.program_id) {
+        return *resp;
     }
-    if let Err(e) = validation::validate_http_url(&payload.repository) {
-        return validation_error_response(e);
+    if let Err(resp) = validate_repository_url(&payload.repository) {
+        return *resp;
     }
 
     info!(

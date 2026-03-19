@@ -10,6 +10,7 @@ use crate::{
     },
     errors::ErrorMessages,
     services::onchain::{self, get_program_authority},
+    validation,
 };
 use axum::{http::StatusCode, Json};
 use tracing::error;
@@ -136,6 +137,33 @@ pub fn validation_error_response(message: impl Into<String>) -> (StatusCode, Jso
             .into(),
         ),
     )
+}
+
+/// Validation helpers for verification endpoints
+pub type HandlerError = Box<(StatusCode, Json<ApiResponse>)>;
+pub type HandlerResult<T> = Result<T, HandlerError>;
+
+pub fn validate_program_id(program_id: &str) -> HandlerResult<()> {
+    validation::validate_pubkey(program_id)
+        .map(|_| ())
+        .map_err(|e| Box::new(validation_error_response(e)))
+}
+
+pub fn validate_signer(signer: &str) -> HandlerResult<()> {
+    validation::validate_pubkey(signer)
+        .map(|_| ())
+        .map_err(|e| Box::new(validation_error_response(e)))
+}
+
+pub fn validate_repository_url(repository: &str) -> HandlerResult<()> {
+    validation::validate_http_url(repository).map_err(|e| Box::new(validation_error_response(e)))
+}
+
+pub fn validate_webhook_url(webhook_url: &Option<String>) -> HandlerResult<()> {
+    if let Some(url) = webhook_url.as_deref() {
+        validation::validate_http_url(url).map_err(|e| Box::new(validation_error_response(e)))?;
+    }
+    Ok(())
 }
 
 /// Creates and inserts build parameters into the database
