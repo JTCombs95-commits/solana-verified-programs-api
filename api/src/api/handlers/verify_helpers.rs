@@ -140,31 +140,37 @@ pub fn validation_error_response(message: impl Into<String>) -> (StatusCode, Jso
 }
 
 /// Validation helpers for verification endpoints
-pub type HandlerError = Box<(StatusCode, Json<ApiResponse>)>;
+pub type HandlerError = (StatusCode, Json<ApiResponse>);
 pub type HandlerResult<T> = Result<T, HandlerError>;
 
+#[allow(clippy::result_large_err)]
 pub fn validate_pubkey(value: &str) -> HandlerResult<()> {
     validation::validate_pubkey(value)
         .map(|_| ())
-        .map_err(|e| Box::new(validation_error_response(e)))
+        .map_err(validation_error_response)
 }
 
+#[allow(clippy::result_large_err)]
 pub fn validate_http_url(value: &str) -> HandlerResult<()> {
-    validation::validate_http_url(value).map_err(|e| Box::new(validation_error_response(e)))
+    validation::validate_http_url(value).map_err(validation_error_response)
 }
 
+#[allow(clippy::result_large_err)]
 pub fn validate_program_id(program_id: &str) -> HandlerResult<()> {
     validate_pubkey(program_id)
 }
 
+#[allow(clippy::result_large_err)]
 pub fn validate_signer(signer: &str) -> HandlerResult<()> {
     validate_pubkey(signer)
 }
 
+#[allow(clippy::result_large_err)]
 pub fn validate_repository_url(repository: &str) -> HandlerResult<()> {
     validate_http_url(repository)
 }
 
+#[allow(clippy::result_large_err)]
 pub fn validate_webhook_url(webhook_url: &Option<String>) -> HandlerResult<()> {
     if let Some(url) = webhook_url.as_deref() {
         validate_http_url(url)?;

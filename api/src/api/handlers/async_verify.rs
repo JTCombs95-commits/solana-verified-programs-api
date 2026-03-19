@@ -26,13 +26,13 @@ pub(crate) async fn process_async_verification(
     Json(payload): Json<SolanaProgramBuildParams>,
 ) -> (StatusCode, Json<ApiResponse>) {
     if let Err(resp) = validate_program_id(&payload.program_id) {
-        return *resp;
+        return resp;
     }
     if let Err(resp) = validate_repository_url(&payload.repository) {
-        return *resp;
+        return resp;
     }
     if let Err(resp) = validate_webhook_url(&payload.webhook_url) {
-        return *resp;
+        return resp;
     }
 
     info!(
@@ -56,13 +56,13 @@ pub(crate) async fn process_async_verification_with_signer(
     Json(payload): Json<SolanaProgramBuildParamsWithSigner>,
 ) -> (StatusCode, Json<ApiResponse>) {
     if let Err(resp) = validate_program_id(&payload.program_id) {
-        return *resp;
+        return resp;
     }
     if let Err(resp) = validate_signer(&payload.signer) {
-        return *resp;
+        return resp;
     }
     if let Err(resp) = validate_webhook_url(&payload.webhook_url) {
-        return *resp;
+        return resp;
     }
 
     info!(
