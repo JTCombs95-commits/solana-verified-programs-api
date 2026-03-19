@@ -347,7 +347,7 @@ mod tests {
             verified_at: None,
             error: Some("test error".to_string()),
         };
-        let result = post_webhook(&webhook_url, &payload).await;
+        let result = post_webhook(webhook_url, &payload).await;
         assert!(result.is_ok());
     }
 }
