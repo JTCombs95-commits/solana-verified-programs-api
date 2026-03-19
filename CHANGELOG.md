@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.1] - 2026-02-17
+## [1.5.2] - 2026-02-17
 
 ### Added
 
@@ -17,5 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Root endpoint (`/`)**: now serves a simple HTML landing page for verify.osec.io (intro, contact, link to solana-verifiable-build docs). API endpoint list is at `GET /api`.
 - **Dependencies:** general dependency updates
 - **Solana-related crates:** updated to current versions (e.g. solana-sdk 4.0.0, solana-client 3.1.8, solana-transaction-status 3.1.8, solana-sdk-ids 3.1.0)
