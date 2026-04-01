@@ -1,0 +1,54 @@
+name: Bump solana-verify in Dockerfile
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Weekly Monday 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump-solana-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Point Dockerfile at latest upstream tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          PINNED=$(grep -oE 'solana-foundation/solana-verifiable-build --tag v[0-9]+\.[0-9]+\.[0-9]+' api/Dockerfile | sed -E 's/.* --tag //')
+          LATEST=$(curl -fsS -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/solana-foundation/solana-verifiable-build/tags?per_page=100" \
+            | jq -r '.[] | .name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          test -n "$LATEST"
+          if [ "$PINNED" = "$LATEST" ]; then
+            echo "Already on ${LATEST}"
+            exit 0
+          fi
+          HIGHER=$(printf '%s\n' "$PINNED" "$LATEST" | sort -V | tail -1)
+          if [ "$HIGHER" != "$LATEST" ]; then
+            echo "Skipping: Dockerfile (${PINNED}) is ahead of upstream (${LATEST})"
+            exit 0
+          fi
+          sed -i.bak "s/${PINNED}/${LATEST}/g" api/Dockerfile
+          rm -f api/Dockerfile.bak
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ github.token }}
+          commit-message: Bump solana-verify in Dockerfile
+          title: 'Bump solana-verify in Dockerfile'
+          body: |
+            Updates the pinned [solana-verifiable-build](https://github.com/solana-foundation/solana-verifiable-build) tag in `api/Dockerfile`.
+
+            Before merge: `docker build -f api/Dockerfile .`
+          branch: autopr-bump-solana-verify
+          delete-branch: true
+          labels: |
+            automated pr
