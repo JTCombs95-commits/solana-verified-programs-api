@@ -29,7 +29,7 @@ impl DbClient {
             .map_err(Into::into)
     }
 
-    /// Retrieves build log information by build ID
+    /// Retrieves build log information by build id
     pub async fn get_logs_info(&self, build_id: &str) -> Result<BuildLogs> {
         use crate::schema::build_logs::dsl::*;
 
@@ -64,7 +64,6 @@ mod tests {
             .await;
         assert!(insert_result.is_ok());
 
-        // Test retrieve
         let get_result = client.get_logs_info(build_id).await;
         assert!(get_result.is_ok());
     }
