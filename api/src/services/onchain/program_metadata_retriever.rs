@@ -6,15 +6,6 @@ use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk_ids::bpf_loader_upgradeable;
 
-#[cfg(feature = "use-external-pdas")]
-use {
-    solana_account_decoder::UiAccountEncoding,
-    solana_client::{
-        rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig},
-        rpc_filter::{Memcmp, RpcFilterType},
-    },
-    solana_sdk::commitment_config::{CommitmentConfig, CommitmentLevel},
-};
 
 /// Program ID for the Otter Verify program
 pub const OTTER_VERIFY_PROGRAMID: Pubkey =
