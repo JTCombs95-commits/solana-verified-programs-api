@@ -106,6 +106,7 @@ mod tests {
     use chrono::Utc;
 
     #[tokio::test]
+    #[ignore = "requires database and Redis"]
     async fn test_build_params_operations() {
         dotenv::dotenv().ok();
         let db_url = std::env::var("TEST_DATABASE_URL").unwrap();

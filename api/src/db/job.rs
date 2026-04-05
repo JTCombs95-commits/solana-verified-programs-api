@@ -41,6 +41,7 @@ mod tests {
     use crate::db::models::JobStatus;
 
     #[tokio::test]
+    #[ignore = "requires database and Redis"]
     async fn test_job_status_update() {
         dotenv::dotenv().ok();
         let db_url = std::env::var("TEST_DATABASE_URL").unwrap();

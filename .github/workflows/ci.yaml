@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["master"]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -54,3 +58,13 @@ jobs:
       - name: Check unused dependencies
         working-directory: api
         run: cargo machete
+
+      - name: Run tests
+        working-directory: api
+        env:
+          RPC_URL: ${{ secrets.RPC_URL }}
+          DATABASE_URL: postgres://dummy:dummy@localhost/dummy
+          REDIS_URL: redis://localhost:6379
+          AUTH_SECRET: dummy-secret
+          PORT: "8080"
+        run: cargo test
