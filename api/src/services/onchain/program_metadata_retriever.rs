@@ -6,7 +6,6 @@ use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk_ids::bpf_loader_upgradeable;
 
-
 /// Program ID for the Otter Verify program
 pub const OTTER_VERIFY_PROGRAMID: Pubkey =
     solana_sdk::pubkey!("verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC");
