@@ -249,6 +249,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "requires database and Redis"]
     async fn test_program_authority() {
         dotenv::dotenv().ok();
         let db_url = std::env::var("TEST_DATABASE_URL").unwrap();
@@ -273,6 +274,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "requires database and Redis"]
     async fn test_program_frozen_and_closed_status() {
         dotenv::dotenv().ok();
         let db_url = std::env::var("TEST_DATABASE_URL").unwrap();

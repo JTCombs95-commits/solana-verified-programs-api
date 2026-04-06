@@ -96,6 +96,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "requires solana-verify binary"]
     async fn test_get_on_chain_hash() {
         let program_id = "verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC";
         let result = get_on_chain_hash(program_id).await;
@@ -109,6 +110,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "requires solana-verify binary"]
     async fn test_get_on_chain_hash_closed_program() {
         // This program has been closed - program data account no longer exists
         let program_id = "2gFsaXeN9jngaKbQvZsLwxqfUrT2n4WRMraMpeL8NwZM";

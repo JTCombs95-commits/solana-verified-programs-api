@@ -69,7 +69,7 @@ mod tests {
         );
         assert_eq!(
             validate_pubkey("12345678901234567890123456789012345678901"),
-            Err("Invalid public key: Invalid Base58 string".to_string())
+            Err("Invalid public key(12345678901234567890123456789012345678901): Invalid Base58 string".to_string())
         );
     }
 

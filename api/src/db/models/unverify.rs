@@ -76,3 +76,51 @@ pub fn parse_helius_transaction(
         (StatusCode::BAD_REQUEST, "Invalid payload")
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// If this test fails, the Helius API may have changed the structure of the transaction payload.
+    /// Review the deserialization of `HeliusParsedTransaction` against the current Helius API response.
+    #[tokio::test]
+    async fn test_parse_helius_transaction_from_api() {
+        dotenv::dotenv().ok();
+        let rpc_url = std::env::var("RPC_URL").expect("RPC_URL must be set");
+        // Helius RPC URL: https://mainnet.helius-rpc.com/?api-key=KEY
+        // Helius API URL: https://api.helius.xyz/v0/transactions/?api-key=KEY
+        let url = rpc_url.replace("mainnet.helius-rpc.com/", "api.helius.xyz/v0/transactions/");
+
+        let tx_sig = "31AUfFXG6BJQjaqwBsCjjZV5ojEL4zbrJ9gKQfKHDMosPvJKQBy6dKTiZgkkjoKbG1StD11csqgWn1KU5EwQsUgX";
+
+        let client = reqwest::Client::new();
+        let body = serde_json::json!({ "transactions": [tx_sig] });
+
+        let response = client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await
+            .expect("Failed to call Helius API");
+
+        assert!(
+            response.status().is_success(),
+            "Helius API returned non-success status: {}",
+            response.status()
+        );
+
+        let payload: Vec<Value> = response
+            .json()
+            .await
+            .expect("Failed to deserialize Helius response");
+
+        let parsed =
+            parse_helius_transaction(&payload).expect("Failed to parse transaction payload");
+
+        assert_eq!(parsed.signature, tx_sig);
+        assert!(
+            !parsed.instructions.is_empty(),
+            "Expected at least one instruction"
+        );
+    }
+}
