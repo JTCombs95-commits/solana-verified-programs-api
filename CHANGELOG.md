@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+
+## [1.5.3] - 2026-04-06
 
 ### Added
 
 - **CI workflow** (`.github/workflows/ci.yaml`): runs `cargo fmt`, `cargo clippy`, `cargo sort`, and `cargo machete` on every push and PR to `master`.
 - **`rust-toolchain.toml`**: pins Rust toolchain to `1.93` (matching the Dockerfile), shared between local dev and CI.
+
+### Changed
+
+- **`solana-verify` version:** updated to `v0.4.15` in `api/Dockerfile`.
+- **`solana-verify` source repo links:** updated from `Ellipsis-Labs/solana-verifiable-build` to `solana-foundation/solana-verifiable-build`.
 
 ### Fixed
 
