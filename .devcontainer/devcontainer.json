@@ -1,0 +1,4 @@
+{gh repo clone JTCombs95-commits/solana-verified-programs-api
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {}
+}
